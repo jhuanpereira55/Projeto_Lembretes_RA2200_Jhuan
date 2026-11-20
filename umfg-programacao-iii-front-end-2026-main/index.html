@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lembretes | Painel de Tarefas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="brand">
+                <span class="brand-badge">UMFG • 2026</span>
+                <h1>Central de Lembretes</h1>
+                <p>Organize compromissos, filtre períodos e exporte relatórios em PDF.</p>
+            </div>
+
+            <div class="topbar-actions">
+                <button type="button" id="btnImprimir" class="btn btn-outline" title="Exportar lista atual em PDF">
+                    Exportar PDF
+                </button>
+                <button type="button" id="btnNovo" class="btn btn-accent">
+                    + Novo Lembrete
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- FORMULÁRIO DE CADASTRO / EDIÇÃO -->
+            <section id="formulario" class="panel form-panel hidden" aria-live="polite">
+                <div class="panel-header">
+                    <h2 id="tituloFormulario">Novo Lembrete</h2>
+                    <span class="panel-hint">Campos marcados com * são obrigatórios</span>
+                </div>
+
+                <form id="formLembrete" novalidate>
+                    <input type="hidden" id="lembreteId">
+
+                    <div class="field-group">
+                        <label for="descricao">Descrição do lembrete *</label>
+                        <input
+                            type="text"
+                            id="descricao"
+                            placeholder="Ex.: Entregar atividade de Programação III no AVA..."
+                            maxlength="500"
+                            required
+                        >
+                        <small id="contadorCaracteres" class="char-counter">0 / 500 caracteres</small>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="button" id="btnCancelar" class="btn btn-ghost">Cancelar</button>
+                        <button type="submit" id="btnSalvar" class="btn btn-accent">Salvar Lembrete</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- FILTROS AVANÇADOS (ETAPA 5) -->
+            <section class="panel filter-panel">
+                <div class="panel-header">
+                    <h2>Filtros de Pesquisa</h2>
+                    <button type="button" id="btnLimparFiltros" class="btn-link">Limpar filtros</button>
+                </div>
+
+                <div class="filters-grid">
+                    <div class="field-group field-descricao">
+                        <label for="filtroDescricao">Descrição</label>
+                        <input
+                            type="text"
+                            id="filtroDescricao"
+                            placeholder="Buscar por palavra-chave..."
+                        >
+                    </div>
+
+                    <div class="field-group">
+                        <label for="filtroDataCadastroInicial">Cadastro (Inicial)</label>
+                        <input type="date" id="filtroDataCadastroInicial">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="filtroDataCadastroFinal">Cadastro (Final)</label>
+                        <input type="date" id="filtroDataCadastroFinal">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="filtroDataAtualizacaoInicial">Atualização (Inicial)</label>
+                        <input type="date" id="filtroDataAtualizacaoInicial">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="filtroDataAtualizacaoFinal">Atualização (Final)</label>
+                        <input type="date" id="filtroDataAtualizacaoFinal">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="tamanhoPagina">Itens por página</label>
+                        <select id="tamanhoPagina">
+                            <option value="5">5 registros</option>
+                            <option value="10" selected>10 registros</option>
+                            <option value="20">20 registros</option>
+                            <option value="50">50 registros</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-submit">
+                        <button type="button" id="btnFiltrar" class="btn btn-primary full-width">
+                            Aplicar Filtros
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TABELA DE RESULTADOS + ORDENAÇÃO + PAGINAÇÃO (ETAPA 6) -->
+            <section class="panel table-panel">
+                <div class="table-toolbar">
+                    <div class="table-title">
+                        <h2>Registros Encontrados</h2>
+                        <span id="infoOrdenacao" class="sort-badge">Ordenado por: Data de Cadastro (DESC)</span>
+                    </div>
+                    <span id="totalRegistros" class="counter-pill">0 registros</span>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-coluna="Descricao">
+                                    <span>Descrição</span>
+                                    <span class="sort-icon" id="sort-Descricao">↕</span>
+                                </th>
+                                <th class="sortable active-sort" data-coluna="DataCadastro">
+                                    <span>Data de Cadastro</span>
+                                    <span class="sort-icon" id="sort-DataCadastro">↓</span>
+                                </th>
+                                <th class="sortable" data-coluna="DataAtualizacao">
+                                    <span>Última Atualização</span>
+                                    <span class="sort-icon" id="sort-DataAtualizacao">↕</span>
+                                </th>
+                                <th class="sortable" data-coluna="IsAtivo">
+                                    <span>Status</span>
+                                    <span class="sort-icon" id="sort-IsAtivo">↕</span>
+                                </th>
+                                <th class="col-acoes">Ações</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="listaLembretes"></tbody>
+                    </table>
+
+                    <div id="estadoCarregando" class="state-box hidden">
+                        <div class="spinner"></div>
+                        <p>Consultando lembretes na API...</p>
+                    </div>
+
+                    <div id="mensagemVazia" class="state-box hidden">
+                        <p class="empty-title">Nenhum lembrete encontrado</p>
+                        <span class="empty-sub">Tente ajustar os filtros aplicados ou cadastre um novo lembrete.</span>
+                    </div>
+                </div>
+
+                <!-- CONTROLES DE PAGINAÇÃO -->
+                <footer class="pagination-bar">
+                    <div class="pagination-info">
+                        <span id="paginaAtual">Página 1 de 1</span>
+                    </div>
+
+                    <div class="pagination-controls">
+                        <button type="button" id="btnPrimeira" class="btn btn-outline btn-sm" title="Primeira página">«</button>
+                        <button type="button" id="btnAnterior" class="btn btn-outline btn-sm">← Anterior</button>
+                        <button type="button" id="btnProximo" class="btn btn-outline btn-sm">Próxima →</button>
+                        <button type="button" id="btnUltima" class="btn btn-outline btn-sm" title="Última página">»</button>
+                    </div>
+                </footer>
+            </section>
+        </main>
+    </div>
+
+    <!--ETAPA 8-->
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
